@@ -1,4 +1,3 @@
-
 class MusicPlayer {
   final bool isPlaying;
   final Duration position;
@@ -7,10 +6,11 @@ class MusicPlayer {
   final List<String> songtitle;
   final List<String> singer;
   final List<String> musicImage;
+
   final int currentSongIndex;
   final bool isShuffling;
   final bool isRepeating;
-  
+  final String currentLyricsLine; // Added current lyrics line
 
   MusicPlayer({
     required this.isPlaying,
@@ -23,6 +23,7 @@ class MusicPlayer {
     required this.currentSongIndex,
     this.isShuffling = false,
     this.isRepeating = false,
+    this.currentLyricsLine = '', // Initialize current lyrics line
   });
 
   MusicPlayer copyWith({
@@ -33,6 +34,7 @@ class MusicPlayer {
     List<String>? songtitle,
     List<String>? singer,
     List<String>? musicImage,
+    // Updated copyWith to handle lyrics
     int? currentSongIndex,
     bool? isShuffling,
     bool? isRepeating,
@@ -44,7 +46,7 @@ class MusicPlayer {
       playlist: playlist ?? this.playlist,
       songtitle: songtitle ?? this.songtitle,
       singer: singer ?? this.singer,
-      musicImage: musicImage?? this.musicImage,
+      musicImage: musicImage ?? this.musicImage,
       currentSongIndex: currentSongIndex ?? this.currentSongIndex,
       isShuffling: isShuffling ?? this.isShuffling,
       isRepeating: isRepeating ?? this.isRepeating,

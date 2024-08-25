@@ -37,6 +37,12 @@ dependencies:
   cupertino_icons: ^1.0.8
   flutter_riverpod: ^2.5.1
   just_audio: ^0.9.39
+  audio_service: ^0.18.15
+  audio_session: ^0.1.21
+  flutter_local_notifications: ^17.2.2
+  path_provider: ^2.1.4
+  collection: ^1.18.0
+  http: ^1.2.2
 
 dev_dependencies:
   flutter_test:
@@ -72,6 +78,7 @@ flutter:
     - assets/song10.mp3
     - assets/song11.mp3
     - assets/song12.mp3
+    - assets/avicii.png
     - assets/album/image1.jpg
     - assets/album/image2.jpg
     - assets/album/image3.jpg

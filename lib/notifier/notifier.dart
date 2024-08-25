@@ -46,26 +46,25 @@ class MusicPlayerNotifier extends StateNotifier<MusicPlayer> {
   Future<void> _onTrackCompleted() async {
     if (state.isRepeating) {
       await seek(Duration.zero);
-      await play();
+      play();
     } else {
-      await next();
+      next();
     }
   }
 
   Future<void> load(String assetPath) async {
     await player.setAsset(assetPath);
-    state = state.copyWith(position: Duration.zero);
     final duration = player.duration ?? Duration.zero;
-    state = state.copyWith(duration: duration);
+    state = state.copyWith(position: Duration.zero, duration: duration);
   }
 
-  Future<void> play() async {
-    await player.play();
+  void play() {
+    player.play();
     state = state.copyWith(isPlaying: true);
   }
 
-  Future<void> pause() async {
-    await player.pause();
+  void pause() {
+    player.pause();
     state = state.copyWith(isPlaying: false);
   }
 
@@ -75,7 +74,7 @@ class MusicPlayerNotifier extends StateNotifier<MusicPlayer> {
         : (state.currentSongIndex + 1) % state.playlist.length;
     state = state.copyWith(currentSongIndex: nextIndex);
     await load(state.playlist[nextIndex]);
-    await play();
+    play();
   }
 
   Future<void> previous() async {
@@ -84,7 +83,7 @@ class MusicPlayerNotifier extends StateNotifier<MusicPlayer> {
         : state.playlist.length - 1;
     state = state.copyWith(currentSongIndex: previousIndex);
     await load(state.playlist[previousIndex]);
-    await play();
+    play();
   }
 
   Future<void> seek(Duration position) async {
@@ -92,13 +91,14 @@ class MusicPlayerNotifier extends StateNotifier<MusicPlayer> {
     state = state.copyWith(position: position);
   }
   Future<void> seekTo(int index) async {
-    if (index >= 0 && index < state.playlist.length) {
-        final currentPosition = player.position;
-        state = state.copyWith(currentSongIndex: index, position: currentPosition);
-        await load(state.playlist[index]);
-        await player.seek(currentPosition);
-        await play();
-    }
+  if (index >= 0 && index < state.playlist.length) {
+   
+    state = state.copyWith(currentSongIndex: index);
+    final currentPosition = state.position;
+    await load(state.playlist[index]);
+    state = state.copyWith(position: currentPosition);
+    play();
+  }
 }
 
   void toggleShuffle() {
@@ -110,7 +110,8 @@ class MusicPlayerNotifier extends StateNotifier<MusicPlayer> {
   }
 }
 
-final musicProvider = StateNotifierProvider<MusicPlayerNotifier, MusicPlayer>((ref) {
+final musicProvider =
+    StateNotifierProvider<MusicPlayerNotifier, MusicPlayer>((ref) {
   return MusicPlayerNotifier(
     playlist: [
       'assets/song1.mp3',
@@ -138,7 +139,7 @@ final musicProvider = StateNotifierProvider<MusicPlayerNotifier, MusicPlayer>((r
       'Silhouettes',
       'I Could Be The One',
       'Addicted To You',
-      'For A Better Day',
+      'Broken Arrow',
     ],
     singer: [
       "Avicii, Aloe Blacc",

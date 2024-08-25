@@ -2,13 +2,26 @@ import 'package:avicii_/notifier/notifier.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class Music extends ConsumerWidget {
+class Music extends ConsumerStatefulWidget {
   const Music({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  _MusicState createState() => _MusicState();
+}
+
+class _MusicState extends ConsumerState<Music> {
+  @override
+  Widget build(BuildContext context) {
     final music = ref.watch(musicProvider);
-    final notifier = ref.watch(musicProvider.notifier);
+    final notifier = ref.read(musicProvider.notifier);
+
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+    final scaleFactor = screenWidth / 380.0;
+    final iconSize = 28.0 * scaleFactor;
+    final playPauseIconSize = 32.0 * scaleFactor;
+    final padding = EdgeInsets.symmetric(horizontal: screenWidth * 0.03);
+    final imageHeight = screenHeight * 0.55; // Adjusted to 40% of screen height
 
     String formatDuration(Duration duration) {
       String twoDigits(int n) => n.toString().padLeft(2, '0');
@@ -19,7 +32,7 @@ class Music extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Best Of Avicii'),
+        title: const Text('Music Player'),
         backgroundColor: Colors.transparent,
         elevation: 0,
         centerTitle: true,
@@ -34,9 +47,10 @@ class Music extends ConsumerWidget {
           ),
         ),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Container(
-              height: 400,
+              height: imageHeight,
               width: double.infinity,
               decoration: BoxDecoration(
                 image: DecorationImage(
@@ -47,150 +61,166 @@ class Music extends ConsumerWidget {
                 ),
               ),
             ),
-            const SizedBox(height: 20),
-            Column(
-              children: [
-                Text(
-                  music.songtitle[music.currentSongIndex],
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                Text(
-                  music.singer[music.currentSongIndex],
-                  style: const TextStyle(
-                    color: Colors.white70,
-                    fontSize: 18,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-              ],
-            ),
-            const SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 1.0),
-                  child: Text(
-                    formatDuration(music.position),
-                    style: const TextStyle(color: Colors.white),
-                  ),
-                ),
-                Expanded(
-                  child: SliderTheme(
-                    data: SliderTheme.of(context).copyWith(
-                      trackHeight: 2.0,
-                      thumbShape:
-                          const RoundSliderThumbShape(enabledThumbRadius: 6.0),
-                      overlayShape:
-                          const RoundSliderOverlayShape(overlayRadius: 25.0),
-                      activeTrackColor: Colors.red,
-                      inactiveTrackColor: Colors.grey,
-                      thumbColor: Colors.white,
-                      overlayColor: Colors.red.withOpacity(0.2),
+            const SizedBox(height: 10), // Adjusted spacing
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.05),
+              child: Column(
+                children: [
+                  Text(
+                    music.songtitle[music.currentSongIndex],
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 24 * scaleFactor,
+                      fontWeight: FontWeight.bold,
                     ),
-                    child: Slider(
-                      value: music.position.inSeconds
-                          .clamp(0, music.duration.inSeconds)
-                          .toDouble(),
-                      min: 0.0,
-                      max: music.duration.inSeconds > 0
-                          ? music.duration.inSeconds.toDouble()
-                          : 1.0, // Ensure max is never 0.0
-                      onChanged: (double value) {
-                        notifier.seek(Duration(seconds: value.toInt()));
-                      },
+                    textAlign: TextAlign.center,
+                  ),
+                  Text(
+                    music.singer[music.currentSongIndex],
+                    style: TextStyle(
+                      color: Colors.white70,
+                      fontSize: 18 * scaleFactor,
                     ),
+                    textAlign: TextAlign.center,
                   ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 1.0),
-                  child: Text(
-                    formatDuration(music.duration),
-                    style: const TextStyle(color: Colors.white),
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                IconButton(
-                  onPressed: () {
-                    notifier.toggleRepeat();
-                  },
-                  icon: Stack(
-                    alignment: Alignment.center,
+            const SizedBox(height: 10), // Adjusted spacing
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.05),
+              child: Column(
+                children: [
+                  Row(
                     children: [
-                      Icon(
-                        Icons.repeat,
-                        color: music.isRepeating ? Colors.blue : Colors.white70,
-                        size: 28,
+                      Text(
+                        formatDuration(music.position),
+                        style: TextStyle(color: Colors.white),
                       ),
-                      if (music.isRepeating)
-                        Positioned(
-                          top: 9,
-                          right: 11,
-                          child: Text(
-                            '1',
-                            style: TextStyle(
-                              color: Colors.blue,
-                              fontSize: 8,
-                              fontWeight: FontWeight.bold,
+                      Expanded(
+                        child: SliderTheme(
+                          data: SliderTheme.of(context).copyWith(
+                            trackHeight: 2,
+                            thumbShape: RoundSliderThumbShape(
+                              enabledThumbRadius: 6,
                             ),
+                            overlayShape: RoundSliderOverlayShape(
+                              overlayRadius: 25,
+                            ),
+                            activeTrackColor: Colors.red,
+                            inactiveTrackColor: Colors.grey,
+                            thumbColor: Colors.white,
+                            overlayColor: Colors.red.withOpacity(0.2),
+                          ),
+                          child: Slider(
+                            value: music.position.inSeconds.toDouble(),
+                            min: 0.0,
+                            max: music.duration.inSeconds.toDouble(),
+                            onChanged: (double value) {
+                              notifier.seek(Duration(seconds: value.toInt()));
+                            },
                           ),
                         ),
+                      ),
+                      Text(
+                        formatDuration(music.duration),
+                        style: TextStyle(color: Colors.white),
+                      ),
                     ],
                   ),
-                ),
-                IconButton(
-                  onPressed: () {
-                    notifier.previous();
-                  },
-                  icon: const Icon(
-                    Icons.skip_previous,
-                    color: Colors.white,
-                    size: 28,
-                  ),
-                ),
-              
-                   
-               if ( music.isPlaying)
-               IconButton(onPressed: (){
-                  notifier.pause();
-               }, icon: Icon(Icons.pause,size: 32,))
-               else IconButton(onPressed: (){
-                  notifier.play();
-               }, icon: Icon(Icons.play_arrow,size: 32,)),
-                    
-                  
-                
-                IconButton(
-                  onPressed: () {
-                    notifier.next();
-                  },
-                  icon: const Icon(
-                    Icons.skip_next,
-                    color: Colors.white,
-                    size: 28,
-                  ),
-                ),
-                IconButton(
-                  onPressed: () {
-                    notifier.toggleShuffle();
-                  },
-                  icon: Icon(
-                    Icons.shuffle,
-                    color: music.isShuffling ? Colors.blue : Colors.white70,
-                    size: 28,
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
+            const SizedBox(height: 10), // Adjusted spacing
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.1),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  IconButton(
+                    onPressed: () {
+                      notifier.toggleRepeat();
+                    },
+                    icon: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        Icon(
+                          Icons.repeat,
+                          color: music.isRepeating ? Colors.red : Colors.white70,
+                          size: iconSize,
+                        ),
+                        if (music.isRepeating)
+                          Positioned(
+                            top: 8.5,
+                            right: 11,
+                            child: Text(
+                              '1',
+                              style: TextStyle(
+                                fontSize: 8 * scaleFactor,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: () {
+                      notifier.previous();
+                    },
+                    icon: Icon(
+                      Icons.skip_previous,
+                      color: Colors.white,
+                      size: iconSize,
+                    ),
+                  ),
+                  FloatingActionButton(
+                    backgroundColor: Colors.red,
+                    onPressed: () {
+                      if (music.isPlaying) {
+                        notifier.pause();
+                      } else {
+                        notifier.play();
+                      }
+                    },
+                    child: AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 200),
+                      transitionBuilder: (child, animation) {
+                        return ScaleTransition(
+                          scale: animation,
+                          child: child,
+                        );
+                      },
+                      child: music.isPlaying
+                          ? Icon(Icons.pause, size: playPauseIconSize)
+                          : Icon(Icons.play_arrow, size: playPauseIconSize),
+                    ),
+                    shape: CircleBorder(),
+                  ),
+                  IconButton(
+                    onPressed: () {
+                      notifier.next();
+                    },
+                    icon: Icon(
+                      Icons.skip_next,
+                      color: Colors.white,
+                      size: iconSize,
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: () {
+                      notifier.toggleShuffle();
+                    },
+                    icon: Icon(
+                      Icons.shuffle_sharp,
+                      color: music.isShuffling ? Colors.red : Colors.white,
+                      size: iconSize,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 20), // Ensure there's enough space at the bottom
           ],
         ),
       ),
